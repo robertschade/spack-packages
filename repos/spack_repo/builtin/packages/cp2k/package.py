@@ -218,6 +218,12 @@ class Cp2k(MakefilePackage, CMakePackage, CudaPackage, ROCmPackage):
             when="@:7",  # req in CP2K v8+
             description="Use CUBLAS for general matrix operations in DBCSR",
         )
+        variant(
+            "cusolvermp", 
+            default=False, 
+            when="@2025.2: build_system=cmake",
+            description="Use CUSOLVER-MP"
+        )
 
     with when("+hip_backend_cuda"):
         depends_on("hipcc")
@@ -427,6 +433,12 @@ class Cp2k(MakefilePackage, CMakePackage, CudaPackage, ROCmPackage):
     with when("@2022: +rocm"):
         depends_on("hipblas")
         depends_on("hipfft")
+
+    with when("+cusolvermp"):
+        depends_on("cusolvermp")
+        depends_on("ucc", type=("build","link","run"))
+        depends_on("ucx")
+        depends_on("nccl")
 
     # The CMake build system and AOCC are not compatible as of AOCC 5
     requires("build_system=makefile", when="%aocc")
@@ -773,6 +785,9 @@ class MakefileBuilder(makefile.MakefileBuilder):
             smeagol = spec["libsmeagol"].libs
             ldflags += [smeagol.search_flags]
             libs.append(smeagol.ld_flags)
+        if spec.satisfies("+cusolvermp"):
+            cppflags += ["-D__CUSOLVERMP_NCCL"]
+            cppflags += ["-D__CUSOLVERMP"]
 
         cc = spack_cc if "~mpi" in spec else spec["mpi"].mpicc
         cxx = spack_cxx if "~mpi" in spec else spec["mpi"].mpicxx
@@ -1173,7 +1188,10 @@ class CMakeBuilder(cmake.CMakeBuilder):
             self.define_from_variant("CP2K_USE_GREENX", "greenx"),
             self.define_from_variant("CP2K_USE_LIBVDWXC", "vdwxc"),
             self.define_from_variant("CP2K_USE_TBLITE", "tblite"),
+            self.define_from_variant("CP2K_USE_CUSOLVER_MP", "cusolvermp"),
+            self.define_from_variant("CP2K_CUSOLVERMP_USE_NCCL", "cusolvermp"),
         ]
+        print(args)
 
         if spec.satisfies("+sirius"):
             args += [
