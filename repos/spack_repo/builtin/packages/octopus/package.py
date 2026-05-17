@@ -23,6 +23,11 @@ class Octopus(cmake.CMakePackage, autotools.AutotoolsPackage, CudaPackage):
     license("GPL-3.0-or-later")
 
     version(
+        "16.4",
+        sha256="fbcf1e966c00fa5dacb80367635d5547de987dcf4151a91ba33c1b40d4331791",
+        url="https://gitlab.com/octopus-code/octopus/-/archive/16.4/octopus-16.4.tar.gz",
+    )
+    version(
         "16.2",
         sha256="be3a361736b8367c24aaf80fa1b31066a3f3eddd7afef3fb6d84145c0413ee0c",
         url="https://gitlab.com/octopus-code/octopus/-/archive/16.2/octopus-16.2.tar.gz",
