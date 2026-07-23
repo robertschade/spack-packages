@@ -1324,6 +1324,8 @@ class CMakeBuilder(cmake.CMakeBuilder):
                         "CMAKE_HIP_ARCHITECTURES", spec.variants["amdgpu_target"].value[0]
                     ),
                 ]
+        ]
+        print(args)
 
         if spec.satisfies("+sirius"):
             args += [
